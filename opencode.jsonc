@@ -1,0 +1,94 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "$comment": "SUPERAGENT v8.0 opencode profile · Author: Rayner Voltia · Repo: https://github.com/raynervoltia/superagentv8",
+  "model": "gloo/gloo-anthropic-claude-opus-5",
+  "small_model": "gloo/gloo-deepseek-v4-flash",
+  "default_agent": "superagent",
+  "instructions": ["AGENTS.md"],
+  "provider": {
+    "deepseek": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "DeepSeek Official",
+      "options": {
+        "baseURL": "https://api.deepseek.com/v1",
+        "apiKey": "{env:DEEPSEEK_API_KEY}"
+      },
+      "models": {
+        "deepseek-chat": {
+          "name": "DeepSeek V3 (Chat)",
+          "description": "Fast, capable, cost-effective"
+        },
+        "deepseek-reasoner": {
+          "name": "DeepSeek R1 (Reasoner)",
+          "description": "Deep reasoning for complex tasks"
+        },
+        "deepseek-coder": {
+          "name": "DeepSeek Coder V2",
+          "description": "Code-specialized 236B, 338 languages"
+        }
+      }
+    },
+    "gloo": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Gloo AI",
+      "options": {
+        "baseURL": "https://platform.ai.gloo.com/ai/v2",
+        "apiKey": "{env:GLOO_API_KEY}"
+      },
+      "models": {
+        "gloo-anthropic-claude-opus-5": {
+          "name": "Anthropic Claude Opus 5 (Gloo)"
+        },
+        "gloo-anthropic-claude-opus-4.7": {
+          "name": "Anthropic Claude Opus 4.7 (Gloo)"
+        },
+        "gloo-deepseek-pro-max": {
+          "name": "DeepSeek Pro Max (Gloo)"
+        },
+        "gloo-deepseek-v4-pro-max": {
+          "name": "DeepSeek V4 Pro Max (Gloo)"
+        },
+        "gloo-deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro (Gloo)"
+        },
+        "gloo-deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash (Gloo)"
+        }
+      }
+    }
+  },
+  "agent": {
+    "superagent": {
+      "description": "SUPERAGENT v8.0 — Professional security engineering assistant for authorized vulnerability research, smart contract auditing, exploit verification, and bug bounty operations.",
+      "mode": "primary",
+      "model": "gloo/gloo-anthropic-claude-opus-5",
+      "temperature": 0.2,
+      "color": "#ff4400",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "write": "allow",
+        "webfetch": "allow",
+        "grep": "allow",
+        "glob": "allow"
+      }
+    },
+    "researcher": {
+      "description": "BREACH v4.0 — Full-spectrum research agent for security analysis, OSINT, automation, deep-dives. Dual-model DeepSeek V4 Flash/Pro.",
+      "mode": "all",
+      "model": "gloo/gloo-deepseek-v4-flash",
+      "temperature": 0.7,
+      "color": "#00ff88",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "write": "allow",
+        "webfetch": "allow",
+        "grep": "allow",
+        "glob": "allow"
+      }
+    }
+  }
+}

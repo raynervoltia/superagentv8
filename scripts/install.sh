@@ -1,113 +1,70 @@
 #!/usr/bin/env bash
 # SUPERAGENT v8.0 Agent Profile Installer
-# Usage: bash scripts/install.sh opencode [target-dir]
-# Editors: opencode, all (aliases: superagent)
+# Usage:
+#   bash scripts/install.sh               # install project-level (current dir)
+#   bash scripts/install.sh project       # same as above
+#   bash scripts/install.sh global        # install ke ~/.config/opencode
+#   bash scripts/install.sh project /path # install ke project tertentu
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROFILES_DIR="$REPO_ROOT/profiles"
 
-EDITOR="${1:-}"
-TARGET_DIR="${2:-$PWD}"
+MODE="${1:-project}"
+TARGET_DIR="${2:-}"
 
-if [[ -z "$EDITOR" ]]; then
-  echo "Usage: bash scripts/install.sh <editor> [target-dir]"
-  echo ""
-  echo "Editors:"
-  echo "  opencode      → AGENTS.md + opencode.json + .opencode/agent/superagent.md + .opencode/agent/researcher.md"
-  echo "  superagent    → alias for opencode"
-  echo "  all           → install every profile (currently only opencode)"
-  echo ""
-  echo "Examples:"
-  echo "  bash scripts/install.sh opencode              # install to current project"
-  echo "  bash scripts/install.sh opencode ~/.config/opencode  # install global"
-  exit 1
-fi
-
-# normalize alias
-if [[ "$EDITOR" == "superagent" ]]; then
-  EDITOR="opencode"
-fi
-
-echo "🛡️⚡ SUPERAGENT v8.0 Profile Installer"
-echo "Target: $TARGET_DIR"
-echo "Editor: $EDITOR"
-echo ""
-
-install_profile() {
-  local editor="$1"
-  local src="$PROFILES_DIR/$editor"
-
-  if [[ ! -d "$src" ]]; then
-    echo "❌ Profile not found: $editor"
-    return 1
+backup_file() {
+  if [[ -f "$1" ]]; then
+    cp "$1" "$1.bak"
+    echo "   ⚠️  Existing file dibackup → $1.bak"
   fi
-
-  echo "📦 Installing: $editor"
-
-  mkdir -p "$TARGET_DIR"
-
-  # Backup existing opencode.json if exists
-  if [[ -f "$TARGET_DIR/opencode.json" ]]; then
-    echo "   ⚠️  Backing up existing opencode.json → opencode.json.bak"
-    cp "$TARGET_DIR/opencode.json" "$TARGET_DIR/opencode.json.bak"
-  fi
-  if [[ -f "$TARGET_DIR/opencode.jsonc" ]]; then
-    echo "   ⚠️  Backing up existing opencode.jsonc → opencode.jsonc.bak"
-    cp "$TARGET_DIR/opencode.jsonc" "$TARGET_DIR/opencode.jsonc.bak"
-  fi
-
-  # Copy all files preserving structure
-  if command -v rsync >/dev/null 2>&1; then
-    rsync -a --exclude='.git' "$src/" "$TARGET_DIR/"
-  else
-    cp -R "$src/." "$TARGET_DIR/"
-  fi
-
-  # Also ensure root-level files are copied if src is opencode and target is different from repo root
-  # For opencode, we want AGENTS.md at target root
-  echo "   ✅ Done: $editor"
-  echo "   → Files installed:"
-  find "$src" -type f | sed "s|$src|   • |" | head -n 20
 }
 
-case "$EDITOR" in
-  all)
-    for e in opencode; do
-      install_profile "$e"
-    done
+case "$MODE" in
+  project)
+    TARGET_DIR="${TARGET_DIR:-$PWD}"
+    AGENTS_DST="$TARGET_DIR/AGENTS.md"
+    AGENT_DST_DIR="$TARGET_DIR/.opencode/agent"
     ;;
-  opencode)
-    install_profile "$EDITOR"
+  global)
+    TARGET_DIR="${TARGET_DIR:-$HOME/.config/opencode}"
+    AGENTS_DST="$TARGET_DIR/AGENTS.md"
+    AGENT_DST_DIR="$TARGET_DIR/agent"
     ;;
   *)
-    echo "❌ Unknown editor: $EDITOR"
-    echo "Run 'bash scripts/install.sh' with no args to see available options."
+    echo "Usage: bash scripts/install.sh [project|global] [target-dir]"
+    echo ""
+    echo "  project  → AGENTS.md + .opencode/agent/*.md di folder project (default)"
+    echo "  global   → AGENTS.md + agent/*.md di ~/.config/opencode"
     exit 1
     ;;
 esac
 
+echo "🛡️⚡ SUPERAGENT v8.0 Profile Installer"
+echo "Mode:   $MODE"
+echo "Target: $TARGET_DIR"
 echo ""
-echo "🎉 SUPERAGENT v8.0 profile installed to $TARGET_DIR!"
-echo ""
-case "$EDITOR" in
-  opencode|all)
-    echo "Next steps:"
-    echo "  1. Set API keys:"
-    echo "     export GLOO_API_KEY=\"sk_...\""
-    echo "     export DEEPSEEK_API_KEY=\"sk-...\""
-    echo "     # atau edit opencode.json: provider.*.options.apiKey"
-    echo "  2. Restart opencode:"
-    echo "     opencode"
-    echo "  3. Pilih agent: superagent (Tab untuk switch)"
-    echo "  4. Test: \"who are you\" → harus jawab SUPERAGENT v8.0"
-    echo ""
-    echo "Docs: docs/opencode.md"
-    echo "Profile: .opencode/agent/superagent.md"
-    ;;
-esac
 
+mkdir -p "$AGENT_DST_DIR"
+
+backup_file "$AGENTS_DST"
+install -m 644 "$REPO_ROOT/AGENTS.md" "$AGENTS_DST"
+echo "   ✅ AGENTS.md"
+
+for src in "$REPO_ROOT"/agent/*.md; do
+  name="$(basename "$src")"
+  backup_file "$AGENT_DST_DIR/$name"
+  install -m 644 "$src" "$AGENT_DST_DIR/$name"
+  echo "   ✅ agent/$name"
+done
+
+echo ""
+echo "🎉 Done!"
+echo ""
+echo "Next steps:"
+echo "  1. Restart opencode (quit → opencode)"
+echo "  2. Tekan Tab untuk switch agent: superagent / researcher"
+echo "  3. Test: \"who are you\" → SUPERAGENT v8.0 / BREACH v4.0"
 echo ""
 echo "🛡️ Ship exploits, not excuses. ⚡"

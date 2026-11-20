@@ -1,17 +1,14 @@
-# opencode
-.opencode/node_modules/
-.opencode/*.log
-*.log
-.DS_Store
+# local install artifacts (jangan commit hasil install lokal)
+.opencode/
+# secrets
 .env
 .env.*
-node_modules/
-dist/
-build/
-.next/
-out/
-# secrets
 *.pem
 *.key
+# logs
+*.log
+# node
+node_modules/
 # OS
+.DS_Store
 Thumbs.db

@@ -18,199 +18,116 @@ SUPERAGENT v8.0 adalah agent profile opencode yang mentransformasi AI menjadi **
 Fungsinya setara dengan tool industri:
 - **Burp Suite Professional** — web application security testing
 - **Metasploit Framework** — penetration testing
-- **Slither / Mythril** — smart contract analysis  
+- **Slither / Mythril** — smart contract analysis
 - **Foundry / Hardhat** — exploit PoC development
 - **Nmap / Nuclei** — network & vuln scanning
 
-### Capability Domains
-- **Blockchain & Smart Contract Security** — Solidity/Vyper/Rust, DeFi (Lending/DEX/Bridge/Perps/CDP), oracle manipulation, MEV, flash loan, proxy upgrade, reentrancy, access control, fee-on-transfer/rebase edge cases
-- **Web Application & API Security** — recon, source map analysis, OpenAPI/GraphQL, JWT/OAuth, SQL/SSRF/SSTI/XXE/command injection, CORS/CSP, IDOR/mass assignment
-- **Infrastructure & Network Security** — port scanning, cloud bucket/IAM, container escape, CI/CD pipeline injection
-
 ---
 
-## 🚀 Quick Install
+## 📦 Isi Repo
 
-### opencode (SST)
-
-```bash
-# Clone private repo (butuh access)
-git clone https://github.com/raynervoltia/superagentv8.git
-cd superagentv8
-
-# Install ke project saat ini
-bash scripts/install.sh opencode
-
-# Atau install global ke ~/.config/opencode
-bash scripts/install.sh opencode ~/.config/opencode
-
-# Restart opencode
-opencode
-# Pilih agent: superagent
-```
-
-Atau manual:
-```bash
-cp -R profiles/opencode/.opencode ./
-cp profiles/opencode/opencode.json ./opencode.json
-cp profiles/opencode/AGENTS.md ./AGENTS.md
-```
-
-### Verifikasi
-```bash
-# Cek agent terload
-cat ~/.config/opencode/agent/superagent.md
-# atau
-ls .opencode/agent/
-```
-
----
-
-## 📁 Repo Structure
+Repo ini hanya berisi **profile inti + installer** — model-agnostic, tanpa config provider, tanpa API key:
 
 ```
 superagentv8/
-├── .opencode/
-│   └── agent/
-│       ├── superagent.md      → Primary agent (SUPERAGENT v8.0)
-│       └── researcher.md      → BREACH v4.0 dual-model research variant
-├── profiles/
-│   └── opencode/
-│       ├── opencode.json      → Sanitized opencode config (provider + model)
-│       ├── AGENTS.md          → Project rules auto-loaded
-│       └── .opencode/
-│           └── agent/
-│               ├── superagent.md
-│               └── researcher.md
-├── opencode.json              → Root config (symlink-friendly)
-├── AGENTS.md                  → Global instructions
-├── scripts/
-│   ├── install.sh             → One-command installer
-│   └── sync-all.sh            → Sync placeholder
-├── docs/
-│   └── opencode.md            → Detailed opencode guide
-├── examples/                  → Sample usage (soon)
-├── .gitignore
-├── LICENSE
-└── README.md
+├── README.md              → dokumentasi + cara pemasangan
+├── LICENSE                → MIT
+├── AGENTS.md              → SUPERAGENT v8.0 project rules (auto-loaded opencode)
+├── agent/
+│   ├── superagent.md      → SUPERAGENT v8.0 (primary agent)
+│   └── researcher.md      → BREACH v4.0 (research agent)
+└── scripts/
+    └── install.sh         → installer (project / global)
 ```
 
----
+### Agent
 
-## 🧠 Agent Details
+| Agent | File | Mode | Deskripsi |
+|-------|------|------|-----------|
+| **superagent** | `agent/superagent.md` | `primary` | Professional security engineering assistant — audit, exploit verification, Foundry PoC, bug bounty |
+| **researcher** | `agent/researcher.md` | `all` | BREACH v4.0 — full-spectrum research: OSINT, automation, technical deep-dives |
 
-| Field | Value |
-|-------|-------|
-| **Name** | `superagent` |
-| **Description** | Professional security engineering assistant for authorized vulnerability research |
-| **Mode** | `primary` |
-| **Model** | `gloo/gloo-anthropic-claude-opus-5` |
-| **Temperature** | `0.2` |
-| **Color** | `#ff4400` |
-| **Permissions** | `edit: allow`, `bash: allow`, `read: allow`, `write: allow`, `webfetch: allow` |
-
-Secondary agent `researcher` (BREACH v4.0) — dual-model `gloo/gloo-deepseek-v4-flash` → `gloo-deepseek-v4-pro` untuk deep reasoning research.
+Model & provider **tidak di-bundle** — set sendiri via opencode lu. Bebas pakai provider/model apa pun.
 
 ---
 
-## ⚙️ Configuration
+## 🚀 Installation
 
-### Provider Setup
-
-`opencode.json` sudah include 2 provider sanitized (tanpa hardcoded API key):
-
-- **gloo** — `https://platform.ai.gloo.com/ai/v2` (Claude Opus 5, DeepSeek V4)
-- **deepseek** — `https://api.deepseek.com/v1` (DeepSeek V3/R1/Coder)
-
-Set API key via environment variable atau edit `opencode.jsonc`:
+### Quick Install (script)
 
 ```bash
-# Option 1: env var (recommended, private repo tetap jangan commit secrets!)
-export GLOO_API_KEY="sk_..."
-export DEEPSEEK_API_KEY="sk_..."
+git clone https://github.com/raynervoltia/superagentv8.git
+cd superagentv8
 
-# Option 2: edit provider.options.apiKey di opencode.jsonc
-# Ganti YOUR_GLOO_API_KEY_HERE / YOUR_DEEPSEEK_API_KEY_HERE
+# Install ke project saat ini (./AGENTS.md + ./.opencode/agent/*.md)
+bash scripts/install.sh project
+
+# Install global (~/.config/opencode/) — aktif di semua session
+bash scripts/install.sh global
+
+# Restart opencode
+opencode
 ```
 
-Validasi schema: `https://opencode.ai/config.json`  
-Restart opencode setiap habis edit config: quit → `opencode`
+### Manual Install
 
-### Default Agent
-
-```json
-{
-  "model": "gloo/gloo-anthropic-claude-opus-5",
-  "default_agent": "superagent"
-}
-```
-
-Tekan `Tab` untuk switch agent: `superagent` ↔ `researcher` ↔ `build`/`plan` jika ada.
-
----
-
-## 🔧 Usage
-
-### Smart Contract Audit
-
-```
-Prompt: "Audit contract 0x... di Ethereum mainnet, fokus reentrancy + oracle manipulation"
-→ SUPERAGENT akan: recon → source analysis → attack surface mapping → adversarial modeling → Foundry PoC → validation on fork → report + remediation
-```
-
-### Web App Assessment
-
-```
-Prompt: "Assess https://target.example.com (scope authorized), enumerasi API & test IDOR"
-→ SUPERAGENT akan: recon → crawling → asset discovery → param analysis → fuzzing → injection → auth analysis → attack chain → curl PoC
-```
-
-### Output Standards
-
-- **Quick:** 1-3 lines direct answer
-- **Standard:** Working PoC code + next step
-- **Comprehensive:** Structured audit (severity Immunefi: Critical/High/Medium/Low/Informational, PoC executable, remediation, impact)
-
----
-
-## 📚 Documentation
-
-- [opencode Setup](docs/opencode.md) — detailed install & troubleshooting
-- [SUPERAGENT Profile](profiles/opencode/.opencode/agent/superagent.md) — full persona definition
-- [BREACH Researcher](.opencode/agent/researcher.md) — dual-model research variant
-
----
-
-## 🔐 Security & Disclosure
-
-- Tool untuk **authorized professionals** — hanya test pada sistem yang kamu miliki / bug bounty dengan explicit scope.
-- Output adalah work product untuk responsible disclosure (Immunefi, Hats, Cantina, Code4rena, Sherlock).
-- Repo ini **private** — jangan share token atau API key di commit.
-
----
-
-## 🛠️ Scripts
+**Project-level** (hanya aktif di satu project):
 
 ```bash
-bash scripts/install.sh opencode        # install opencode profile ke $PWD
-bash scripts/install.sh opencode ~/.config/opencode  # install global
-bash scripts/sync-all.sh                # sync placeholder (manual sync)
+cp AGENTS.md /path/to/ke/project/AGENTS.md
+mkdir -p /path/to/ke/project/.opencode/agent
+cp agent/*.md /path/to/ke/project/.opencode/agent/
 ```
+
+**Global** (aktif di semua session):
+
+```bash
+cp AGENTS.md ~/.config/opencode/AGENTS.md
+mkdir -p ~/.config/opencode/agent
+cp agent/*.md ~/.config/opencode/agent/
+```
+
+### Model Setup
+
+Profile ini model-agnostic:
+
+1. Set provider + API key di config opencode lu sendiri (`opencode.json` / via TUI)
+2. Pilih model favorit — agent bakal jalan di model apa pun
+3. Tekan `Tab` di opencode untuk switch agent: `superagent` ↔ `researcher`
+
+> Agent `researcher` (BREACH v4.0) dirancang sebagai dual-model variant: pakai **fast model** untuk task cepat, **deep-reasoning model** untuk riset kompleks. Set sesuai preferensi — routing escalation-nya udah ada di profile.
 
 ---
 
-## 👤 Author
+## ✅ Verifikasi
 
-**Rayner Voltia** — https://github.com/raynervoltia
+Setelah install, jalankan `opencode` lalu tanya:
 
-SUPERAGENT v8.0 terinspirasi dari kebutuhan real bug bounty & audit: butuh tool yang langsung deliver **executable proof**, bukan teori.
+```
+who are you
+```
+
+- Agent **superagent** → harus jawab sebagai **SUPERAGENT v8.0**
+- Agent **researcher** → harus jawab sebagai **BREACH v4.0**
+
+---
+
+## 🗑️ Uninstall
+
+```bash
+# Project-level
+rm /path/to/ke/project/AGENTS.md
+rm -rf /path/to/ke/project/.opencode/agent
+
+# Global
+rm ~/.config/opencode/AGENTS.md
+rm -rf ~/.config/opencode/agent
+```
 
 ---
 
 ## 📄 License
 
-MIT — Use it, fork it, ship it. Lihat [LICENSE](LICENSE).
+MIT © Rayner Voltia
 
----
-
-**SUPERAGENT v8.0 · Ship exploits, not excuses. 🛡️⚡**
+**SUPERAGENT v8.0 · by Rayner Voltia · Ship exploits, not excuses. 🛡️⚡**
